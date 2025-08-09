@@ -15,7 +15,6 @@
   const milestoneBox = document.getElementById('milestones');
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // Simple WebAudio beep synth (no external files)
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   const actx = new AudioCtx();
   function beep(freq=880, duration=0.09, type='sine', vol=0.08) {
@@ -35,9 +34,9 @@
     score: 0, lives: 3, timeLeft: 60,
     multiplier: 1, streak: 0,
     timers: new Set(),
-    spawnRate: 850, // ms
-    hazardRate: 0.22, // portion of spawns that are hazards
-    powerRate: 0.10,  // chance a spawn is a power-up
+    spawnRate: 850,
+    hazardRate: 0.22,
+    powerRate: 0.10,
     bucketActive: false,
     milestonesShown: new Set(),
   };
@@ -48,7 +47,6 @@
     hard:   {time: 55, spawn: 650, hazard: 0.30, power: 0.08},
   };
 
-  // Milestone messages (LevelUp)
   const MESSAGES = [
     {score: 60,  text: "Halfway to the first jerry can! Keep going."},
     {score: 150, text: "Great work — you're filling the tank fast."},
@@ -100,7 +98,6 @@
 
   function spawnEntity() {
     if (!state.running || state.paused) return;
-
     const roll = Math.random();
     if (roll < state.powerRate) {
       spawnPower();
@@ -121,7 +118,6 @@
     el.setAttribute('aria-label', 'Clean water drop, 10 points');
     el.addEventListener('pointerdown', () => collectDrop(el));
     board.appendChild(el);
-
     const ttl = setTimeout(() => { el.remove(); miss(); }, 2200);
     state.timers.add(ttl);
   }
@@ -136,7 +132,6 @@
     el.setAttribute('aria-label', 'Contaminant, avoid');
     el.addEventListener('pointerdown', () => hitHazard(el));
     board.appendChild(el);
-
     const ttl = setTimeout(() => el.remove(), 3000);
     state.timers.add(ttl);
   }
@@ -151,7 +146,6 @@
     el.style.top = y + 'px';
     el.addEventListener('pointerdown', () => activatePower(kind, el));
     board.appendChild(el);
-
     const ttl = setTimeout(() => el.remove(), 4500);
     state.timers.add(ttl);
   }
@@ -259,8 +253,20 @@
   startBtn.addEventListener('click', startGame);
   pauseBtn.addEventListener('click', pauseGame);
   resetBtn.addEventListener('click', resetGame);
-  modalClose.addEventListener('click', () => modal.hidden = true);
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.hidden = true; });
+
+  // Changed: OK button now restarts
+  modalClose.addEventListener('click', () => {
+    modal.hidden = true;
+    startGame();
+  });
+
+  modal.addEventListener('click', (e) => { 
+    if (e.target === modal) {
+      modal.hidden = true;
+      startGame();
+    }
+  });
+
   difficultyEl.addEventListener('change', () => setDifficulty(difficultyEl.value));
 
   board.addEventListener('keydown', (e)=>{
@@ -268,7 +274,6 @@
     if (e.key.toLowerCase() === 'r') { e.preventDefault(); resetGame(); }
   });
 
-  // Initialize
   setDifficulty(difficultyEl.value);
   updateHUD();
 })();
